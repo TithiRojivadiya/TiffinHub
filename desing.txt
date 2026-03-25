@@ -1,0 +1,5 @@
+🎯 Palette: Primary: #6D28D9 (deep plum purple) 
+Secondary: #C4B5FD (soft lavender) 
+Background: #FAF5FF (light lavender-white) 
+Dark: #1F1B2E 
+Accent: #FACC15 (muted gold)
