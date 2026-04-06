@@ -1,0 +1,66 @@
+users
+- name
+- email (UNIQUE)
+- phone_no
+- location
+- password
+- role (CUSTOMER / VENDOR)
+
+
+vendors
+- user_id (FK → users.id)
+- business_name
+
+
+
+plans
+- vendor_id (FK → vendors.id)
+- name
+- meal_type (VEG / NON_VEG / VEGAN)
+- meal_time (BREAKFAST / LUNCH / DINNER)
+- duration_days (7 / 30)
+- price
+- serving_size
+- description
+- general_menu
+- cover_image
+- status (ACTIVE / INACTIVE)
+- created_at
+- business_name (FK -> vendors.business_name)
+
+
+
+subscriptions
+- user_id (FK → users.id)
+- plan_id (FK → plans.id)
+- start_date
+- end_date
+- days_used
+- extra_days_added
+- payment_type (PREPAID / POSTPAID)
+- total_amount
+- amount_paid
+- outstanding_amount
+- payment_status (PAID / PENDING / PARTIAL)
+- status (ACTIVE / EXPIRED / CANCELLED)
+- created_at
+
+
+
+extra_orders
+- user_id (FK → users.id)
+- vendor_id (FK → vendors.id)
+- date
+- quantity
+- price
+- status (ORDERED / DELIVERED)
+- created_at
+
+
+
+deliveries
+- subscription_id (FK → subscriptions.id)
+- date
+- quantity
+- status (PENDING / DELIVERED)
+- created_at
