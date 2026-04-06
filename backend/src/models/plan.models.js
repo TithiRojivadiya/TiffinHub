@@ -58,7 +58,7 @@ const PlanSchema = mongoose.Schema({
     },
     cover_image: {
         type: String,
-        default : "././Gallery/Tiffinbox/default.jpeg"
+        default : "https://res.cloudinary.com/dsl55yufe/image/upload/v1775497800/j0qj62c43mi76z5h9w74.jpg"
     }
 
 
