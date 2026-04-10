@@ -12,10 +12,12 @@ const VendorSchema = mongoose.Schema({
         required: true
     },
     delivery_start_time: {
-        type: String
+        type: String,
+        default: "9:00 AM"
     },
     delivery_end_time: {
-        type: String
+        type: String,
+        default: "10:00 PM"
     }
     
 
