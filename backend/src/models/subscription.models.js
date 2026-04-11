@@ -12,10 +12,14 @@ const SubscriptionSchema = mongoose.Schema({
         ref: 'Vendor',
         required: true
     },
-    plan_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Plan',
-        required: true
+    plan : {
+        type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Plan',
+                required: true
+            }
+        ]
     },
     start_date: {
         type: Date,

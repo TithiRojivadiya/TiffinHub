@@ -23,6 +23,8 @@ let generateAccessAndRefreshToken = async (userId) => {
 
 }
 
+
+
 // sign up for customer
 const registerUserCustomer = asyncHandler(async (req, res) => {
     
@@ -123,7 +125,7 @@ const registerUserVendor = asyncHandler(async (req, res) => {
     })
 
     const vendorProfile = await Vendor.create({
-        user_id: user._id, // This isreference!
+        user_id: user._id, // This is reference
         business_name,
         delivery_start_time: req.body.delivery_start_time || "09:00 AM" , // default or from req.body
         delivery_end_time: req.body.delivery_end_time || "10:00 PM" 
@@ -231,5 +233,6 @@ export {
     registerUserCustomer,
     registerUserVendor,
     loginUser,
-    logOutUser
+    logOutUser,
+    generateAccessAndRefreshToken
 }

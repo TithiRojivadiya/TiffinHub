@@ -11,6 +11,10 @@ const PlanSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    slug: { 
+        type: String, 
+        index: true
+    },
     meal_type: {
         type: String,
         enum: ["VEG", "NON-VEG", "VEGAN"],
@@ -48,20 +52,42 @@ const PlanSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["ACTIVE", "INACTIVE"],
+        enum: ["ACTIVE", "PAUSED", "DELETED"],
         default: "ACTIVE"
     },
     payment_type: {
         type: String,
         enum: ["PREPAID", "POSTPAID"],
-        required: true
+        required: true,
+        default: "PREPAID"
     },
     cover_image: {
         type: String,
         default : "https://res.cloudinary.com/dsl55yufe/image/upload/v1775497800/j0qj62c43mi76z5h9w74.jpg"
+    },
+    deletedAt: { 
+        type: Date, 
+        default: null 
     }
 
 
 }, {timestamps: true})
+
+PlanSchema.pre('save', function(next) {
+    if (this.isModified('name')) {
+        this.slug = this.name
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '_')   // Replace spaces with underscore
+    }
+    next();
+});
+
+PlanSchema.index({ vendor_id: 1, slug: 1 }, { unique: true });
+
+PlanSchema.index({ deletedAt: 1 }, { 
+    expireAfterSeconds: 172800,
+    partialFilterExpression: { deletedAt: { $type: "date" } } 
+});
 
 export const Plan = mongoose.model('Plan', PlanSchema)
