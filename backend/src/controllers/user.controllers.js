@@ -9,6 +9,9 @@ let generateAccessAndRefreshToken = async (userId) => {
     try {
 
         const user = await User.findById(userId)
+        if (!user) {
+            throw new ApiError(404, "User not found ❌");
+        }
         const accessToken = user.createAccessToken()
         const refreshToken = user.createRefreshToken()
         user.refreshToken = refreshToken
@@ -23,6 +26,9 @@ let generateAccessAndRefreshToken = async (userId) => {
 
 }
 
+
+
+// Authentication
 
 
 // sign up for customer
@@ -228,6 +234,7 @@ const logOutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out 👍"))
 
 })
+
 
 export {
     registerUserCustomer,

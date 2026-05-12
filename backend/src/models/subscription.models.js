@@ -7,32 +7,28 @@ const SubscriptionSchema = mongoose.Schema({
         ref: 'User',
         required: true
     },
-    vendor_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor',
-        required: true
-    },
     plan : {
-        type: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Plan',
-                required: true
-            }
-        ]
+        type: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Plan',
+            required: true
+        }
     },
-    start_date: {
+    start_date: {  // of plan 
         type: Date,
         default: Date.now,
         required: true
     },
-    end_date: {
+    end_date: { // of plan
         type: Date,
         required: true
     },
-    days_used: {
+    days_consumed: {
         type: Number,
         default: 0
+    },
+    value_consumed: {
+        type: Number
     },
     extra_days_added: {
         type: Number,
@@ -53,10 +49,13 @@ const SubscriptionSchema = mongoose.Schema({
         enum: ["PAID", "PENDING", "PARTIAL"],
         default: "PENDING"
     },
-    status: {
+    status: {   // of service
         type: String,
-        enum: ["ACTIVE", "EXPIRED", "CANCELLED"],
+        enum: ["ACTIVE", "EXPIRED", "CANCELLED", "PAUSED"],
         default: "ACTIVE"
+    },
+    cancelled_at: {
+        type: Date
     },
     pause_periods: [
         {
@@ -64,7 +63,6 @@ const SubscriptionSchema = mongoose.Schema({
             to: Date
         }
     ]
-
 
 }, {timestamps: true})
 

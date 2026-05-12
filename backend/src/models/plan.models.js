@@ -80,7 +80,7 @@ PlanSchema.pre('save', function(next) {
             .trim()
             .replace(/\s+/g, '_')   // Replace spaces with underscore
     }
-    next();
+    return next;
 });
 
 PlanSchema.index({ vendor_id: 1, slug: 1 }, { unique: true });

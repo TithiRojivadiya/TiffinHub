@@ -18,11 +18,11 @@ vendorRouter.route("/plans").post(
     )
 )
 
-vendorRouter.post("/plans", verifyJWT, verifyVendor, createPlan )   // create
-vendorRouter.get("/plans/:name", verifyJWT, verifyVendor,  getPlan)   // get plan
-vendorRouter.delete("/plans/:name", verifyJWT, verifyVendor,  deletePlan)   // delete plan
-vendorRouter.patch("/plans/:name/pause", verifyJWT, verifyVendor,  pausePlan)   // pause plan
-vendorRouter.patch("/plans/:name/resume", verifyJWT, verifyVendor,  resumePlan)   // resume plan
+vendorRouter.post("/plans", verifyJWT, verifyVendor, createPlan )   // create   // http://localhost:8000/api/v1/vendors/plans
+vendorRouter.get("/plans/:name", verifyJWT, verifyVendor,  getPlan)   // get plan   // http://localhost:8000/api/v1/vendors/plans/Student Special Lunch
+vendorRouter.delete("/plans/:name", verifyJWT, verifyVendor,  deletePlan)   // delete plan  // 
+vendorRouter.patch("/plans/:name/pause", verifyJWT, verifyVendor,  pausePlan)   // pause plan   // http://localhost:8000/api/v1/vendors/plans/Student Special Lunch/pause
+vendorRouter.patch("/plans/:name/resume", verifyJWT, verifyVendor,  resumePlan)   // resume plan    // http://localhost:8000/api/v1/vendors/plans/Student Special Lunch/resume
 
 
 export default vendorRouter

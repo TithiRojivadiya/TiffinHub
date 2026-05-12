@@ -1,0 +1,3 @@
+for frontend :::
+- add ai for writing description for vendor to new plan (in background starts working)
+- bill generation

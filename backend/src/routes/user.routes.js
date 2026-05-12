@@ -6,17 +6,6 @@ import { verifyJWT } from "../middlewares/auth.middlewares.js";
 const router = Router()
 const upload = multer();
 
-// router.route("/register").post(
-//     upload.fields(
-//         [
-//             {
-//                 name: 'coverImage',
-//                 maxCount: 1
-//             }
-//         ]
-//     )
-// )
-
 router.post("/register/customer", upload.none(), registerUserCustomer); // http://localhost:8000/api/v1/users/register/customer
 router.post("/register/vendor", upload.none(), registerUserVendor); // http://localhost:8000/api/v1/users/register/vendor
 router.route("/login").post(upload.none(), loginUser)  // http://localhost:8000/api/v1/users/login
