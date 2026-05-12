@@ -313,7 +313,7 @@ let getSubscribedPlan = asyncHandler(async (req, res) => {
 })
 
 
-// to get all Subscribed Plan ---> /users/getPlans
+// to get all Subscribed Plan ---> /users/getSubscribedPlans
 let getAllSubscribedPlan = asyncHandler(async (req, res) => {
 
     const allPlans = await Subscription.find({ 
