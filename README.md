@@ -89,4 +89,4 @@ The backend functionality and core subscription workflows are implemented succes
 
 ## Author
 
-Keira
+Tithi Rojivadiya
