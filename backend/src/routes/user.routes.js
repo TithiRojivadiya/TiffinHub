@@ -16,12 +16,12 @@ router.route("/login").post(upload.none(), loginUser)  // http://localhost:8000/
 router.route("/logout").post(verifyJWT, logOutUser) // http://localhost:8000/api/v1/users/logout
 
 // subscription
-router.post("/users/:planId/subscribe", verifyJWT, subscribePlan)
-router.patch("/users/:planId/unsubscribe", verifyJWT, unsubscribePlan)
-router.post("/users/:planId/payment", verifyJWT, makePayment)
-router.patch("/users/:planId/pause", verifyJWT, pauseSubscription)
-router.patch("/users/:planId/resume", verifyJWT, resumeSubscription)
-router.get("/users/:planId", verifyJWT, getSubscribedPlan)
-router.get("/users/getSubscribedPlans", verifyJWT, getAllSubscribedPlan)
+router.post("/subscribe/:planId", verifyJWT, subscribePlan); 
+router.patch("/unsubscribe/:planId", verifyJWT, unsubscribePlan);
+router.post("/payment/:planId", verifyJWT, makePayment);
+router.patch("/pause/:planId", verifyJWT, pauseSubscription);
+router.patch("/resume/:planId", verifyJWT, resumeSubscription);
+router.get("/plan/:planId", verifyJWT, getSubscribedPlan);
+router.get("/my-subscriptions", verifyJWT, getAllSubscribedPlan);
 
 export default router

@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import {verifyJWT} from "../middlewares/auth.middlewares.js" 
 import {verifyVendor} from "../middlewares/vendor.middlewares.js"
-import { createPlan, getPlan, deletePlan, resumePlan,  pausePlan} from "../controllers/plan.controllers.js";
+import { createPlan, getPlan, deletePlan} from "../controllers/plan.controllers.js";
 
 const vendorRouter = Router()
 const upload = multer()

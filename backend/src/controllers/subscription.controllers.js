@@ -2,7 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js";
 import { Plan } from "../models/plan.models.js";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { Subscription } from "../models/subscription.models.js";
 
 const verifyOwnership = (resource, userId) => {
@@ -121,64 +121,71 @@ let subscribePlan = asyncHandler(async (req, res) => {
 
 // to unsubscribe Plan  ---> /users/:planId/unsubscribe
 let unsubscribePlan = asyncHandler(async (req, res) => {
+    // 1. Match the name from router.js (:planId)
+    const { planId } = req.params; 
 
-    const { subscriptionId } = req.params || {};
-    if(!subscriptionId){
+    // This check was failing because subscriptionId was undefined
+    if (!planId) {
         throw new ApiError(400, "planId required 😤");
     }
 
+    // 2. Find by the plan reference, not the subscription's own _id
     const sub = await Subscription.findOne({ 
-        _id: subscriptionId, 
+        plan: planId, // Use 'plan' or 'plan_id' based on your Schema
         user_id: req.user._id, 
-        status: "ACTIVE" 
+        status: { $in: ["ACTIVE", "PAUSED"] } // Allow cancellation if active or paused
     });
 
     if (!sub) {
         throw new ApiError(404, "No active subscription found to cancel 😶");
     }
 
-    verifyOwnership(sub, req.user._id)
-
+    // 3. Update status
     sub.status = "CANCELLED";
-    sub.cancelled_at = Date.now(); 
+    sub.cancelled_at = new Date(); 
     
     await sub.save();
 
     return res.status(200).json(
         new ApiResponse(200, sub, "Subscription cancelled successfully 👋")
     );
-
-})
+});
 
 
 // to pay the amount of subscription    ---> /users/:planId/payment
 let makePayment = asyncHandler(async (req, res) => {
+    let { planId } = req.params;
 
-    let {planId} = req.params || {}
-    if(!planId){
+    if (!planId) {
         throw new ApiError(400, "planId required 😤");
     }
 
-    let planExist = await Subscription.findById(planId)
-    if(!planExist){
-        throw new ApiError(404, "Plan does not exist 😩")
+    // FIX: Look for the subscription where the plan field matches the planId from URL
+    // Also ensure we only get the subscription for the LOGGED-IN user
+    let subscription = await Subscription.findOne({
+        plan: planId,         // or plan_id, depending on your schema
+        user_id: req.user._id,
+        status: { $ne: "DELETED" }
+    });
+
+    if (!subscription) {
+        throw new ApiError(404, "No active subscription found for this plan 😩");
     }
 
-    if (planExist.payment_status === "PAID") {
-        return res.status(200).json(new ApiResponse(200, "Plan is already paid"));
+    if (subscription.payment_status === "PAID") {
+        return res.status(200).json(new ApiResponse(200, subscription, "Plan is already paid"));
     }
 
-    verifyOwnership(planExist, req.user._id)
+    // Update status
+    subscription.payment_status = "PAID";
+    subscription.status = "ACTIVE"; // Usually payment activates the plan
 
-    planExist.payment_status = "PAID"
-
-    await planExist.save()
+    await subscription.save();
 
     return res.status(200).json(
-        new ApiResponse(200, "Payment successfully 👋")
+        new ApiResponse(200, subscription, "Payment successful 👋")
     );
-
-})
+});
 
 
 // to pause Subscription    ---> /users/:planId/pause
@@ -191,7 +198,11 @@ let pauseSubscription = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Both start and end dates are required 😤");
     }
 
-    let subscription = await Subscription.findById(planId);
+    let subscription = await Subscription.findOne({
+        plan: planId, // Ensure this matches your schema field (plan or plan_id)
+        user_id: req.user._id,
+        status: "ACTIVE" // Safety check: only resume if it was actually paused
+    });
     if (!subscription) throw new ApiError(404, "Subscription not found 😩");
 
     verifyOwnership(subscription, req.user._id);
@@ -236,9 +247,9 @@ let pauseSubscription = asyncHandler(async (req, res) => {
     // Immediate status update if pause starts today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (start <= today && end >= today) {
-        subscription.status = "PAUSED";
-    }
+    
+    subscription.status = "PAUSED";
+    
 
     await subscription.save();
 
@@ -249,34 +260,74 @@ let pauseSubscription = asyncHandler(async (req, res) => {
 
 
 // to resume Subscription ---> /users/:planId/resume
+// let resumeSubscription = asyncHandler(async (req, res) => {
+//     let { planId } = req.params || {};
+
+//     let subscription = await Subscription.findOne({
+//         plan: planId, // Ensure this matches your schema field (plan or plan_id)
+//         user_id: req.user._id,
+//         status: "PAUSED" // Safety check: only resume if it was actually paused
+//     });
+//     if (!subscription) throw new ApiError(404, "Subscription not found");
+
+//     verifyOwnership(subscription, req.user._id);
+
+//     if (subscription.status !== "PAUSED") {
+//         throw new ApiError(400, "Subscription is not in a paused state.");
+//     }
+
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+
+//     // Find the latest pause period
+//     const lastPause = subscription.pause_periods[subscription.pause_periods.length - 1];
+
+//     if (lastPause && lastPause.to > today) {
+//         // They are resuming EARLY
+//         const unusedTime = lastPause.to.getTime() - today.getTime();
+//         const unusedDays = Math.ceil(unusedTime / (1000 * 3600 * 24));
+
+//         // Pull the end date back since they didn't use the full pause
+//         subscription.end_date = new Date(subscription.end_date.getTime() - unusedTime);
+//         subscription.extra_days_added -= unusedDays;
+        
+//         // Update the log so we know they resumed early
+//         lastPause.to = today;
+//     }
+
+//     subscription.status = "ACTIVE";
+//     await subscription.save();
+
+//     return res.status(200).json(new ApiResponse(200, subscription, "Resumed manually! 🍱"));
+// });
+
 let resumeSubscription = asyncHandler(async (req, res) => {
-    let { planId } = req.params || {};
+    const { planId } = req.params;
 
-    let subscription = await Subscription.findById(planId);
-    if (!subscription) throw new ApiError(404, "Subscription not found");
+    // Try finding by plan_id OR plan just to be safe
+    const subscription = await Subscription.findOne({
+        $or: [{ plan: planId }, { plan_id: planId }],
+        user_id: req.user._id
+    });
 
-    verifyOwnership(subscription, req.user._id);
-
-    if (subscription.status !== "PAUSED") {
-        throw new ApiError(400, "Subscription is not in a paused state.");
+    if (!subscription) {
+        throw new ApiError(404, "Subscription record not found in database 🔍");
     }
 
+    if (subscription.status !== "PAUSED") {
+        throw new ApiError(400, `Cannot resume. Current status is: ${subscription.status}`);
+    }
+
+    // ... your early resume logic ...
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Find the latest pause period
     const lastPause = subscription.pause_periods[subscription.pause_periods.length - 1];
-
     if (lastPause && lastPause.to > today) {
-        // They are resuming EARLY
         const unusedTime = lastPause.to.getTime() - today.getTime();
         const unusedDays = Math.ceil(unusedTime / (1000 * 3600 * 24));
-
-        // Pull the end date back since they didn't use the full pause
         subscription.end_date = new Date(subscription.end_date.getTime() - unusedTime);
         subscription.extra_days_added -= unusedDays;
-        
-        // Update the log so we know they resumed early
         lastPause.to = today;
     }
 
@@ -295,7 +346,10 @@ let getSubscribedPlan = asyncHandler(async (req, res) => {
         throw new ApiError(400, "planId required 😤");
     }
 
-    let planExist = await Subscription.findById(planId)
+    let planExist = await Subscription.findOne({
+        plan: planId,         // or plan_id, depending on your schema
+        user_id: req.user._id,
+    });
     if(!planExist){
         throw new ApiError(404, "Plan does not exist 😩")
     }
@@ -326,6 +380,8 @@ let getAllSubscribedPlan = asyncHandler(async (req, res) => {
     );
 
 })
+
+// 6a0396fa8fa2cd0e011ac500
 
 
 export {
